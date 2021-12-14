@@ -2,13 +2,15 @@
 from backend.app.dto.eventschema import EventQuery
 from backend.app.models.eventmodels import Event
 from backend.app.config.database import engine
+from backend.app.dto.eventschema import EventSchema, EventQuery
 
 from fastapi import Query
 
 from typing import Optional
 
 from sqlmodel import Session, and_
-from backend.app.dto.eventschema import EventSchema, EventQuery
+
+from backend.app.config.tables import EventTable
 
 
 class EventService:
@@ -25,9 +27,9 @@ class EventService:
 
     async def deleteEvent(id: int):
         db = Session(engine)
-        db_id = await db.query(Event).filter(Event.id == id).first()
-        await db.delete(db_id)
-        await db.commit()
+        db_id = db.query(Event).filter(Event.id == id).first()
+        db.delete(db_id)
+        db.commit()
         return "Delete Event"
 
 
@@ -57,7 +59,12 @@ class EventService:
 
     async def updateEvent(id: int, request: EventSchema):
         db = Session(engine)
-        db_id = await db.query(Event).filter(Event.id == id).first()
+
+        try :
+            db_id =  db.query(Event).filter(Event.id == id).first()
+        except:
+            raise "Error"
+
 
         timestamps = str(request.timestamps)
         ip_address = str(request.ip_address)
@@ -66,13 +73,12 @@ class EventService:
         db_id.timestamps = timestamps
         db_id.ip_address = ip_address
         db_id.type = request_type
-
         payload_length = "%05d" % (5 + 4 + len(timestamps) \
             + len(ip_address) + len(request_type))
 
         db_id.payload_length = payload_length
 
-        await db.commit()
+        db.commit()
 
         return "Update Event"
 

@@ -6,6 +6,7 @@ class EventSchema(BaseModel):
     timestamps: str
     ip_address: str
     type: int
+    sent: Optional[int]
     class Config():
         #enable orm_mode
         orm_mode = True

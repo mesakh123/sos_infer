@@ -32,9 +32,9 @@ async def createEvent(event: EventSchema):
 
 @router.post("/{id}")
 async def updateEvent(id: int, request: EventSchema):
-    return EventService.updateEvent(id=id, request=request)
+    return await EventService.updateEvent(id=id, request=request)
 
 
 @router.delete("/{id}")
 async def deleteEvent(id: int):
-    return EventService.deleteEvent(id=id)
+    return await EventService.deleteEvent(id=id)

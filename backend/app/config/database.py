@@ -8,11 +8,11 @@ from databases import Database
 
 
 
-db_host = os.environ.get('db_host', 'localhost')
-db_name = os.environ.get('db_name', 'dev')
-db_port = urllib.parse.quote_plus(str(os.environ.get('db_port', '5432')))
-db_user = urllib.parse.quote_plus(str(os.environ.get('db_user', 'root')))
-db_pass = urllib.parse.quote_plus(str(os.environ.get('db_pass', 'linkernetworks')))
+db_host = os.environ.get('DB_HOST', 'localhost')
+db_name = os.environ.get('DB_NAME', 'dev')
+db_port = urllib.parse.quote_plus(str(os.environ.get('DB_PORT', '5432')))
+db_user = urllib.parse.quote_plus(str(os.environ.get('POSTGRES_USER', 'root')))
+db_pass = urllib.parse.quote_plus(str(os.environ.get('POSTGRES_PASSWORD', 'linkernetworks')))
 ssl_mode = urllib.parse.quote_plus(str(os.environ.get('ssl_mode', 'prefer')))
 db_url = f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
 

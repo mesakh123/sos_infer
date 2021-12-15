@@ -3,17 +3,62 @@ version: '3.1'
 services:
 
   db:
+    container_name: postgresql_db
     image: postgres
     restart: always
     ports:
-      - 5432:5432
+      - ${DB_PORT}:5432
     environment:
-      POSTGRES_DB: dev
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: linkernetworks
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks: 
+      - app_network
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
 
-  adminer:
-    image: adminer
+
+  pg_admin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     restart: always
     ports:
-      - 9898:8080
+      - 5050:80
+    depends_on:
+      - db
+    networks: 
+      - app_network
+
+
+  app:
+    container_name: sos_infer_api
+    image: sos_infer_api
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    expose:
+      - 9000
+    ports:
+      - 9000:9000
+    restart: always
+    depends_on:
+      - pg_admin
+      - db
+    networks: 
+      - app_network
+    volumes:
+      - ./backend:/backend
+
+networks:
+  app_network:
+    driver: bridge
+#  adminer:
+#    image: adminer
+#    restart: always
+#    ports:
+#     - 9898:8080

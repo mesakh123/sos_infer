@@ -1,84 +1,95 @@
 
-from backend.app.dto.eventschema import EventQuery
-from backend.app.models.eventmodels import Event
-from backend.app.config.database import engine
-from backend.app.dto.eventschema import EventSchema, EventQuery
+from ..dto.eventschema import EventQuery
+from ..models.eventmodels import Events
+from ..config.database import engine
+from ..dto.eventschema import EventSchema, EventQuery,EventPartialSchema
 
-from fastapi import Query
+from fastapi import HTTPException
 
 from typing import Optional
 
-from sqlmodel import Session, and_
+from sqlmodel import Session
 
-from backend.app.config.tables import EventTable
+from ..config.tables import EventTable
+from ..config.database import database
 
 
 class EventService:
     async def getAllEvent(req: Optional[EventQuery] = None):
-        db = Session(engine)
-        if req:
-            req = req.dict()
-            filtered_req = {k: v for k, v in req.items() if v is not None}
-            filters = [getattr(Event, attribute) == value for attribute, value in filtered_req.items()]
-            
-            return db.query(Event).filter(and_(*filters)).all()
+        query = EventTable.select()
+        if not req:
+            data = await database.fetch_all(query)
+            return data
 
-        return db.query(Event).all()
+        req = req.dict()
+        filtered_req = {k: v for k, v in req.items() if v is not None}
+        for attribute, value in filtered_req.items():
+            query = query.where(getattr(EventTable.columns, attribute) == value)
+        #filters = [getattr(Event, attribute) == value for attribute, value in filtered_req.items()]
+
+        #print("Filters ",*filters)
+        data = await database.fetch_one(query)
+        if not data:
+            return None
+        return EventQuery(**data).dict()
+        
+  
 
     async def deleteEvent(id: int):
-        db = Session(engine)
-        db_id = db.query(Event).filter(Event.id == id).first()
-        db.delete(db_id)
-        db.commit()
-        return "Delete Event"
+        query = EventTable.delete().where(EventTable.columns.id == id)
+        await database.execute(query=query)
+        return "Event Deleted"
 
 
     async def createEvent(request: EventSchema):
-        db =  Session(engine)
-
+        
         timestamps = str(request.timestamps)
         ip_address = str(request.ip_address)
         request_type = str(request.type)
+        request_sent = str(request.sent)
 
         payload_length = "%05d" % (5 + 4 + len(timestamps) \
             + len(ip_address) + len(request_type))
 
-        db_cr = Event(
+        db_cr = Events(
             payload_length = payload_length,
             timestamps = timestamps,
             ip_address = ip_address,
             type = int(request_type),
-            event = 0,
+            sent = int(request_sent),
         )
-
-        db.add(db_cr)
-        db.commit()
-        db.refresh(db_cr)
+        query = {k : v for k,v in db_cr.dict().items() if v is not None}
+        query = EventTable.insert(values=query)
+        user_id = await database.execute(query)
 
         return "Event Created"
 
-    async def updateEvent(id: int, request: EventSchema):
-        db = Session(engine)
+    async def updateEvent(id: int, request: EventPartialSchema):
+        query = EventTable.select().where(EventTable.columns.id == id)
+        row = await database.fetch_one(query=query)
 
-        try :
-            db_id =  db.query(Event).filter(Event.id == id).first()
-        except:
-            raise "Error"
+        if not row:
+            raise HTTPException(
+                status_code=404,
+                detail="Item not found",
+                headers={"X-Error": f"Request asked for event id: [{id}]"}
+            )
 
+        req = request.dict()
+        filtered_req = {k: v for k, v in req.items() if v is not None}
+        
+        total = 0
+        for k, v in row.items():
 
-        timestamps = str(request.timestamps)
-        ip_address = str(request.ip_address)
-        request_type = str(request.type)
+            if k not in filtered_req:
+                total += len(str(v))
+            else:
+                total += len(str(filtered_req[k]))
+        filtered_req['payload_length'] = "%05d" % (total + 4 - len(str(row['sent'])) - len(str(row['id'])))
+        query = EventTable.update().where(EventTable.columns.id == id).values(**filtered_req)
+        
+        await database.execute(query=query)
 
-        db_id.timestamps = timestamps
-        db_id.ip_address = ip_address
-        db_id.type = request_type
-        payload_length = "%05d" % (5 + 4 + len(timestamps) \
-            + len(ip_address) + len(request_type))
-
-        db_id.payload_length = payload_length
-
-        db.commit()
 
         return "Update Event"
 

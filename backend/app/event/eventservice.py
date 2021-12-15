@@ -1,78 +1,160 @@
 
-from backend.app.dto.eventschema import EventQuery
-from backend.app.models.eventmodels import Event
-from backend.app.config.database import engine
+from ..dto.eventschema import EventQuery
+from ..models.eventmodels import Events
+from ..config.database import engine
+from ..dto.eventschema import EventSchema, EventQuery,EventPartialSchema
 
-from fastapi import Query
-
+from fastapi import HTTPException, Response, status
 from typing import Optional
 
-from sqlmodel import Session, and_
-from backend.app.dto.eventschema import EventSchema, EventQuery
+from sqlmodel import Session
+
+from ..config.tables import EventTable
+from ..config.database import database
 
 
 class EventService:
-    def getAllEvent(req: Optional[EventQuery] = None):
-        db = Session(engine)
-        if req:
-            #filter req
-            req = req.dict()
-            filtered_req = {k: v for k, v in req.items() if v is not None}
-            filters = [getattr(Event, attribute) == value for attribute, value in filtered_req.items()]
+    async def getAllEvent(req: Optional[EventQuery] = None):
+        try:
+            query = EventTable.select()
+
+            # Check Whether there is query request
+            # If there is no request, return whole database dataset
+            if not req:
+                data = await database.fetch_all(query)
+                return data
+
+            # If there is query request        
+            # first, convert request to dict
+            req = req.dict() 
             
-            return db.query(Event).filter(and_(*filters)).all()
+            # filter empty query parameters
+            filtered_req = {k: v for k, v in \
+                    req.items() if v is not None}
+            
+            # Create WHERE conditions
+            for attribute, value in filtered_req.items():
+                query = query.where(getattr(EventTable.columns, attribute) == value)
+            
+            # Execute query
+            data = await database.fetch_one(query)
 
-        return db.query(Event).all()
+            # If data doesn't exist return None
+            if not data:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Event not found",
+                    headers={"X-Error": f"Event doens't exists"}
+                )
+            return EventQuery(**data).dict()
+        
+        except:
+            raise HTTPException(
+                status_code=500,
+                detail="Server Busy",
+                headers={"X-Error": f"Server busy, please try again"}
+            )
+        
+  
 
-    def deleteEvent(id: int):
-        db = Session(engine)
-        db_id = db.query(Event).filter(Event.id == id).first()
-        db.delete(db_id)
-        db.commit()
-        return "Delete Event"
+    async def deleteEvent(id: int):
+        try:
+            try:
+                query = EventTable.delete().where(EventTable.columns.id == id)
+            except:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Event not found",
+                    headers={"X-Error": f"Event doens't exists"}
+                )
+
+            await database.execute(query=query)
+            return Response(content="Event deleted", status_code=status.HTTP_200_OK)
+        except:
+            raise HTTPException(
+                status_code=400,
+                detail="Server Busy",
+                headers={"X-Error": f"Delete error, please try again"}
+            )
 
 
-    def createEvent(request: EventSchema):
-        db = Session(engine)
+    async def createEvent(request: EventSchema):
+        try:   
+            timestamps = str(request.timestamps)
+            ip_address = str(request.ip_address)
+            request_type = str(request.type)
+            request_sent = str(request.sent)
 
-        timestamps = str(request.timestamps)
-        ip_address = str(request.ip_address)
-        request_type = str(request.type)
+            # Calculate payload length (fixed format)
+            payload_length = "%05d" % (5 + 4 + len(timestamps) \
+                + len(ip_address) + len(request_type))
 
-        payload_length = "%05d" % (5 + 4 + len(timestamps) \
-            + len(ip_address) + len(request_type))
+            # Initiate Event data
+            db_cr = Events(
+                payload_length = payload_length,
+                timestamps = timestamps,
+                ip_address = ip_address,
+                type = int(request_type),
+                sent = int(request_sent),
+            )
+            # filter Event data
+            query = {k : v for k,v in db_cr.dict().items() if v is not None}
 
-        db_cr = Event(
-            payload_length = payload_length,
-            timestamps = timestamps,
-            ip_address = ip_address,
-            type = int(request_type),
-            event = 0,
-        )
+            # Initiate Insert command
+            query = EventTable.insert(values=query)
 
-        db.add(db_cr)
-        db.commit()
+            # Execute data
+            user_id = await database.execute(query)
 
-        return "Event Created"
+            return Response(content="Event created", status_code=status.HTTP_200_OK)
 
-    def updateEvent(id: int, request: EventSchema):
-        db = Session(engine)
-        db_id = db.query(Event).filter(Event.id == id).first()
+        except:
+            raise HTTPException(
+                status_code=400,
+                detail="Server Busy",
+                headers={"X-Error": f"Create error, please try again"}
+            )
 
-        timestamps = str(request.timestamps)
-        ip_address = str(request.ip_address)
-        request_type = str(request.type)
+    async def updateEvent(id: int, request: EventPartialSchema):
 
-        db_id.timestamps = timestamps
-        db_id.ip_address = ip_address
-        db_id.type = request_type
+        try:
+            # Get data from database with id
+            query = EventTable.select().where(EventTable.columns.id == id)
+            row = await database.fetch_one(query=query)
 
-        payload_length = "%05d" % (5 + 4 + len(timestamps) \
-            + len(ip_address) + len(request_type))
+            # If data doesn't exist
+            if not row:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Item not found",
+                    headers={"X-Error": f"Request asked for event id: [{id}]"}
+                )
 
-        db_id.payload_length = payload_length
+            # filter None request
+            req = request.dict()
+            filtered_req = {k: v for k, v in req.items() if v is not None}
+            
+            # Calculate new data length
+            total = 0
+            for k, v in row.items():
+                if k not in filtered_req:
+                    total += len(str(v))
+                else:
+                    total += len(str(filtered_req[k]))
+            
+            filtered_req['payload_length'] = "%05d" % (total + 4 - len(str(row['sent'])) - len(str(row['id'])))
 
-        db.commit()
+            # Initiate UPDATE command
+            query = EventTable.update().where(EventTable.columns.id == id).values(**filtered_req)
+            
+            # Execute Command
+            await database.execute(query=query)
 
-        return "Update Event"
+            return Response(content="Event updated", status_code=status.HTTP_200_OK)
 
+        except:
+            raise HTTPException(
+                status_code=400,
+                detail="Server Busy",
+                headers={"X-Error": f"Update error, please try again"}
+            )

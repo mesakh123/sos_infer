@@ -1,18 +1,21 @@
 from fastapi import FastAPI
-from backend.app.config.database import create_table
+from .config.database import database
+from .event import eventrouter
 
-from backend.app.event import eventrouter
-
-app = FastAPI()
+app = FastAPI(docs_url=None, redoc_url=None)
 
 
 @app.on_event("startup")
-async def table_all():
-    create_table()
+async def startup():
+    await database.connect()
+
+@app.on_event("shutdown")
+async def shutdown():
+    await database.disconnect()
 
 
 @app.get("/")
-def Hello():
+async def Hello():
     return "Hello"
 
 

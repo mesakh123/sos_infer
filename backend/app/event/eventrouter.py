@@ -1,40 +1,40 @@
 from typing import Optional
 from fastapi import APIRouter
-from backend.app.dto.eventschema import EventQuery, EventSchema
+from ..dto.eventschema import EventQuery, EventSchema, EventPartialSchema
 from .eventservice import EventService
 
 router = APIRouter(prefix="/event", tags=["Events"])
 
 
 @router.get('/')
-def GetAllEvent(id: Optional[int] = None,timestamps: Optional[str]= None,
+async def GetAllEvent(id: Optional[int] = None,timestamps: Optional[str]= None,
     ip_address: Optional[str]= None, type: Optional[int]= None, sent: Optional[int]= None):
-    if id or timestamps or ip_address or type:
+    if id is not None or timestamps is not None  or ip_address is not None  or type is not None :
         request = {}
-        if id:
-            request.update({'id':id})
-        if timestamps:
+        if id is not None :
+            request.update({'id':id})            
+        if timestamps is not None :
             request.update({'timestamps':timestamps})
-        if ip_address:
+        if ip_address is not None :
             request.update({'ip_address':ip_address})
-        if type:
+        if type is not None :
             request.update({'type':type})
-        if sent:
+        if sent is not None :
             request.update({'sent':sent})
         request = EventQuery(**request)
-        return EventService.getAllEvent(request) 
-    return EventService.getAllEvent()
+        return await EventService.getAllEvent(request) 
+    return await EventService.getAllEvent()
 
 @router.post("/")
-def createEvent(event: EventSchema):
-    return EventService.createEvent(event)
+async def createEvent(event: EventSchema):
+    return await EventService.createEvent(event)
 
 
 @router.post("/{id}")
-def updateEvent(id: int, request: EventSchema):
-    return EventService.updateEvent(id=id, request=request)
+async def updateEvent(id: int, request: EventPartialSchema):
+    return await EventService.updateEvent(id=id, request=request)
 
 
 @router.delete("/{id}")
-def deleteEvent(id: int):
-    return EventService.deleteEvent(id=id)
+async def deleteEvent(id: int):
+    return await EventService.deleteEvent(id=id)

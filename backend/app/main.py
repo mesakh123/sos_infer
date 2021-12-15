@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from .config.database import database
 from .event import eventrouter
 
-app = FastAPI()
+app = FastAPI(docs_url=None, redoc_url=None)
 
 
 @app.on_event("startup")

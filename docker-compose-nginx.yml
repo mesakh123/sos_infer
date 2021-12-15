@@ -33,16 +33,14 @@ services:
       - app_network
 
 
-  app:
-    container_name: sos_infer_api
+  app1:
+    container_name: sos_infer_api_1
     image: sos_infer_api
     build:
       context: ./backend
       dockerfile: Dockerfile
     env_file:
       - ./.env
-    expose:
-      - 9000
     ports:
       - 9000:9000
     restart: always
@@ -54,6 +52,39 @@ services:
     volumes:
       - ./backend:/backend
 
+  
+  app2:
+    container_name: sos_infer_api_2
+    image: sos_infer_api
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    ports:
+      - 9001:9000
+    restart: always
+    depends_on:
+      - pg_admin
+      - db
+    networks: 
+      - app_network
+    volumes:
+      - ./backend:/backend
+
+
+  nginx:
+    build: 
+      context : ./nginx
+      dockerfile: Dockerfile.multi
+    ports:
+      - 80:80
+    depends_on:
+      - app1
+      - app2
+    networks: 
+      - app_network
+    restart: always
 
 
 

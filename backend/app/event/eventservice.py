@@ -107,7 +107,7 @@ class EventService:
             raise HTTPException(
                 status_code=400,
                 detail="Server Busy",
-                headers={"X-Error": f"Delete error, please try again"}
+                headers={"X-Error": f"Create event error, please try again"}
             )
 
 
@@ -150,5 +150,5 @@ class EventService:
             raise HTTPException(
                 status_code=400,
                 detail="Server Busy",
-                headers={"X-Error": f"Delete error, please try again"}
+                headers={"X-Error": f"Update event error, please try again"}
             )

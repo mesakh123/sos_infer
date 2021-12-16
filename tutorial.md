@@ -14,8 +14,8 @@ https://www.jeffastor.com/blog/pairing-a-postgresql-db-with-your-dockerized-fast
 A. Start alembic
 0. sudo docker-compose build
 1. pip3 install alembic
-2. alembic init alembic
+2. alembic init -t async alembic
 3. then , change data in env.py and alembic.ini
-4. docker-compose run app alembic revision --autogenerate -m "New Migration"
-5. docker-compose run app alembic upgrade head
+4. docker-compose run --rm app alembic revision --autogenerate -m "New Migration"
+5. docker-compose run --rm app alembic upgrade head
 6. sudo docker-compose up --build -d --force-recreate

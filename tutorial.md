@@ -19,3 +19,9 @@ A. Start alembic
 4. docker-compose run --rm app alembic revision --autogenerate -m "New Migration"
 5. docker-compose run --rm app alembic upgrade head
 6. sudo docker-compose up --build -d --force-recreate
+
+
+create role root superuser;
+create database sos_infer_db;
+ALTER USER root with PASSWORD 'linkeradmin123';
+psql postgres -d sos_infer_db

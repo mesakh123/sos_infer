@@ -56,7 +56,8 @@ class EventService:
 
     async def deleteEvent(id: int):
         try:
-            query = Events.delete().where(Events.columns.id == id)
+            query = Events.select().where(Events.columns.id == id)
+            await database.execute(query=query)
         except:
             raise HTTPException(
                 status_code=404,
@@ -64,6 +65,7 @@ class EventService:
                 headers={"X-Error": f"Event doens't exists"}
             )
         try:
+            query = Events.delete().where(Events.columns.id == id)
             await database.execute(query=query)
             return Response(content="Event deleted", status_code=status.HTTP_200_OK)
         except:

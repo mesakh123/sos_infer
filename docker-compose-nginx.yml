@@ -78,7 +78,7 @@ services:
       context : ./nginx
       dockerfile: Dockerfile.multi
     ports:
-      - 80:80
+      - 7777:80
     depends_on:
       - app1
       - app2

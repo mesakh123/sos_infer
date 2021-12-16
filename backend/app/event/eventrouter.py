@@ -8,7 +8,10 @@ router = APIRouter(prefix="/event", tags=["Events"])
 
 @router.get('/')
 async def GetAllEvent(id: Optional[int] = None,timestamps: Optional[str]= None,
-    ip_address: Optional[str]= None, type: Optional[int]= None, sent: Optional[int]= None):
+    ip_address: Optional[str]= None, type: Optional[int]= None, sent: Optional[int]= None,
+    skip: int = 0,
+    limit: int = 100,
+    ):
     if id is not None or timestamps is not None  or ip_address is not None  or type is not None :
         request = {}
         if id is not None :

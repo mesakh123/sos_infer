@@ -24,6 +24,7 @@ class EventService:
         # Check Whether there is query request
         # If there is no request, return whole database dataset
         if not req:
+            print("here")
             data = await database.fetch_all(query.offset(skip).limit(limit))
             return data
 

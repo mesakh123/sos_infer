@@ -25,3 +25,5 @@ create role root superuser;
 create database sos_infer_db;
 ALTER USER root with PASSWORD 'linkeradmin123';
 psql postgres -d sos_infer_db
+
+http://127.0.0.1:9000/event/?id=1&timestamps=timestamps&ip_address=127.0.0.1&type=0&sent=1&skip=100&limit=300

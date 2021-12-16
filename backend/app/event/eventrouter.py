@@ -25,8 +25,8 @@ async def GetAllEvent(id: Optional[int] = None,timestamps: Optional[str]= None,
         if sent is not None :
             request.update({'sent':sent})
         request = EventQuery(**request)
-        return await EventService.getAllEvent(request) 
-    return await EventService.getAllEvent()
+        return await EventService.getAllEvent(request, skip = skip, limit = limit) 
+    return await EventService.getAllEvent(skip = skip, limit = limit)
 
 @router.post("/")
 async def createEvent(event: EventSchema):

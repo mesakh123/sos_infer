@@ -5,8 +5,8 @@
 bower_components
 node_modules
 
-postgres-data/*
-backend/alembic/versions/*
+postgres-data/**
+backend/alembic/versions/**
 
 .DS_Store
 

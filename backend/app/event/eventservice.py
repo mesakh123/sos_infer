@@ -51,7 +51,7 @@ class EventService:
                 headers={"X-Error": f"Event doens't exists"}
             )
         return EventQuery(**data).dict()
-        
+    
     @database.transaction()
     async def createEvent(request: EventSchema):
         ip_address = str(request.ip_address)

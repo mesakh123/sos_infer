@@ -4,9 +4,8 @@ services:
 
   db:
     container_name: postgresql_db
-    build: 
-      context : ./postgre
-      dockerfile: Dockerfile
+    image: postgres
+    restart: always
     ports:
       - ${DB_PORT}:5432
     environment:
@@ -46,7 +45,6 @@ services:
       - 9000:9000
     restart: always
     depends_on:
-      - pg_admin
       - db
     networks: 
       - app_network
@@ -66,7 +64,6 @@ services:
       - 9001:9000
     restart: always
     depends_on:
-      - pg_admin
       - db
     networks: 
       - app_network

@@ -5,10 +5,12 @@
 bower_components
 node_modules
 
-postgres-data
+postgres-data/**
+backend/alembic/versions/**
 
+.DS_Store
 
-
+*.db
 
 # Created by https://www.toptal.com/developers/gitignore/api/python
 # Edit at https://www.toptal.com/developers/gitignore?templates=python

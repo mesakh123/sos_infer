@@ -14,7 +14,7 @@ import pytz
 
 from ..models.eventmodels import Events
 from ..config.database import database
-
+from sqlalchemy import desc
 
 class EventService:
     async def getAllEvent(req: Optional[EventQuery] = None,skip: int = 0,limit: int = 100):
@@ -24,7 +24,7 @@ class EventService:
         # Check Whether there is query request
         # If there is no request, return whole database dataset
         if not req:
-            data = await database.fetch_all(query.offset(skip).limit(limit))
+            data = await database.fetch_all(query.offset(skip).limit(limit).order_by(Events.c.timestamps.desc()))
             return data
 
         # If there is query request        
@@ -56,7 +56,8 @@ class EventService:
 
     async def deleteEvent(id: int):
         try:
-            query = Events.delete().where(Events.columns.id == id)
+            query = Events.select().where(Events.columns.id == id)
+            await database.execute(query=query)
         except:
             raise HTTPException(
                 status_code=404,
@@ -64,6 +65,7 @@ class EventService:
                 headers={"X-Error": f"Event doens't exists"}
             )
         try:
+            query = Events.delete().where(Events.columns.id == id)
             await database.execute(query=query)
             return Response(content="Event deleted", status_code=status.HTTP_200_OK)
         except:
@@ -107,7 +109,7 @@ class EventService:
             raise HTTPException(
                 status_code=400,
                 detail="Server Busy",
-                headers={"X-Error": f"Delete error, please try again"}
+                headers={"X-Error": f"Create event error, please try again"}
             )
 
 
@@ -150,5 +152,5 @@ class EventService:
             raise HTTPException(
                 status_code=400,
                 detail="Server Busy",
-                headers={"X-Error": f"Delete error, please try again"}
+                headers={"X-Error": f"Update event error, please try again"}
             )

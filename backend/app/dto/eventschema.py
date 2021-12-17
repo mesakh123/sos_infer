@@ -10,7 +10,6 @@ class EventPartialSchema(BaseModel):
         orm_mode = True
 
 class EventSchema(BaseModel):
-    #timestamps: datetime.datetime
     ip_address: str
     type: int
     sent: Optional[int] = 0
@@ -34,7 +33,7 @@ class CreateEventSchema(BaseModel):
     
 class EventQuery(BaseModel):
     id: Optional[int]
-    timestamps: Optional[datetime.datetime]
+    timestamps: Optional[str]
     ip_address: Optional[str]
     type: Optional[int]
     sent: Optional[int]

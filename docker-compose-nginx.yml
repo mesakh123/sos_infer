@@ -15,7 +15,7 @@ services:
     networks: 
       - app_network
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data:rw
+      - ./postgres-data:/var/lib/postgresql/data
 
 
   pg_admin:
@@ -78,7 +78,7 @@ services:
       context : ./nginx
       dockerfile: Dockerfile.multi
     ports:
-      - 80:80
+      - 7777:80
     depends_on:
       - app1
       - app2
@@ -87,6 +87,33 @@ services:
     restart: always
 
 
+  pgbackups:
+    container_name: Postgre_Backup_Service
+    image: prodrigestivill/postgres-backup-local
+    restart: always
+    volumes:
+        - ./postgres-data:/backups
+    links:
+        - db:db
+    depends_on:
+        - db
+    ports:
+      - 8787:8787
+    environment:
+        - BACKUP_SUFFIX=.dup
+        - POSTGRES_HOST=db
+        - POSTGRES_DB=${DB_NAME}
+        - POSTGRES_USER=${POSTGRES_USER}
+        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    #  - POSTGRES_PASSWORD_FILE=/run/secrets/db_password <-- alternative for POSTGRES_PASSWORD (to use with docker secrets)
+        - POSTGRES_EXTRA_OPTS=-Z9 --schema=public --blobs
+        - SCHEDULE=@every 0h1m00s
+        - BACKUP_KEEP_DAYS=7
+        - BACKUP_KEEP_WEEKS=4
+        - BACKUP_KEEP_MONTHS=6
+        - HEALTHCHECK_PORT=8787
+    networks: 
+      - app_network
 
 networks:
   app_network:

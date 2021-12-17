@@ -15,7 +15,7 @@ services:
     networks: 
       - app_network
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data:rw
+      - pg-data:/var/lib/postgresql/data
 
 
   pg_admin:
@@ -86,7 +86,8 @@ services:
       - app_network
     restart: always
 
-
+volumes:
+  pg-data:
 
 networks:
   app_network:

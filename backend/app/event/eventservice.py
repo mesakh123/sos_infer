@@ -14,7 +14,7 @@ import pytz
 
 from ..models.eventmodels import Events
 from ..config.database import database
-
+from sqlalchemy import desc
 
 class EventService:
     async def getAllEvent(req: Optional[EventQuery] = None,skip: int = 0,limit: int = 100):
@@ -25,7 +25,7 @@ class EventService:
         # If there is no request, return whole database dataset
         if not req:
             print("here")
-            data = await database.fetch_all(query.offset(skip).limit(limit))
+            data = await database.fetch_all(query.offset(skip).limit(limit).order_by(Events.c.timestamps.desc()))
             return data
 
         # If there is query request        

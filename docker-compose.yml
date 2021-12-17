@@ -15,7 +15,7 @@ services:
     networks: 
       - app_network
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - pg-data:/var/lib/postgresql/data
 
 
   pg_admin:
@@ -55,7 +55,8 @@ services:
       - ./backend:/backend
 
 
-
+volumes:
+  pg-data:
 
 networks:
   app_network:

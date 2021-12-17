@@ -27,3 +27,26 @@ ALTER USER root with PASSWORD 'linkeradmin123';
 psql postgres -d sos_infer_db
 
 http://127.0.0.1:9000/event/?id=1&timestamps=timestamps&ip_address=127.0.0.1&type=0&sent=1&skip=100&limit=300
+
+
+https://simplebackups.com/blog/docker-postgres-backup-restore-guide-with-examples/#back-up-a-docker-postgresql-database
+
+
+https://www.tecmint.com/backup-and-restore-postgresql-database/
+1. backup data 
+    pg_dump -F t sos_infer_db > backup.tar
+2. restore data
+ pg_restore -d sos_infer_db --no-privileges --no-owner --clean --if-exists --exit-on-error backup.tar
+
+backup data
+1. inside postgresql docker exec, change to /var/lib/postgresql/data
+    cd /var/lib/postgresql/data
+2. do 
+    pg_dump -U root sos_infer_db  > backup_file.sql
+#pg_dump -U root -O -W -F t sos_infer_db >  "backup_file.tar"
+
+
+restore
+1. cd /var/lib/postgresql/data
+2.  pg_restore -c -U root - "backup_file.tar" -W
+pg_restore -U root -Ft -C -d sos_infer_db < backup_file.tar

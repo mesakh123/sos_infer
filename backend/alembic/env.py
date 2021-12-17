@@ -6,17 +6,8 @@ from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from alembic import context
+from app.config.database import db_url
 
-import os, urllib
-
-db_host = os.environ.get('DB_HOST', 'localhost')
-db_name = os.environ.get('DB_NAME', 'dev')
-db_port = urllib.parse.quote_plus(str(os.environ.get('DB_PORT', '5432')))
-db_user = urllib.parse.quote_plus(str(os.environ.get('POSTGRES_USER', 'root')))
-db_pass = urllib.parse.quote_plus(str(os.environ.get('POSTGRES_PASSWORD', 'linkernetworks')))
-ssl_mode = urllib.parse.quote_plus(str(os.environ.get('ssl_mode', 'prefer')))
-db_header= os.environ.get('DB_HEADER',"postgresql")
-db_url = f"{db_header}://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}"
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

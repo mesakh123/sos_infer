@@ -73,7 +73,7 @@ services:
         - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     #  - POSTGRES_PASSWORD_FILE=/run/secrets/db_password <-- alternative for POSTGRES_PASSWORD (to use with docker secrets)
         - POSTGRES_EXTRA_OPTS=-Z9 --schema=public --blobs
-        - SCHEDULE=@every 0h1m00s
+        - SCHEDULE=@every 03h00m00s
         - BACKUP_KEEP_DAYS=7
         - BACKUP_KEEP_WEEKS=4
         - BACKUP_KEEP_MONTHS=6

@@ -2,6 +2,8 @@
 from ..dto.eventschema import EventQuery
 from ..models.eventmodels import Events
 from ..config.database import engine
+from ..models.eventmodels import Events
+from ..config.database import database
 from ..dto.eventschema import EventSchema, EventQuery,EventPartialSchema,CreateEventSchema
 
 from fastapi import HTTPException, Response, status
@@ -12,11 +14,10 @@ import datetime
 import pytz
 
 
-from ..models.eventmodels import Events
-from ..config.database import database
 from sqlalchemy import desc
 
 class EventService:
+    @database.transaction()
     async def getAllEvent(req: Optional[EventQuery] = None,skip: int = 0,limit: int = 100):
 
         query = Events.select()
@@ -24,7 +25,7 @@ class EventService:
         # Check Whether there is query request
         # If there is no request, return whole database dataset
         if not req:
-            data = await database.fetch_all(query.offset(skip).limit(limit).order_by(Events.c.timestamps.desc()))
+            data = await database.fetch_all(query.offset(skip).limit(limit).order_by( desc(Events.c.timestamps)))
             return data
 
         # If there is query request        
@@ -50,33 +51,8 @@ class EventService:
                 headers={"X-Error": f"Event doens't exists"}
             )
         return EventQuery(**data).dict()
-        
-
-  
-
-    async def deleteEvent(id: int):
-        try:
-            query = Events.select().where(Events.columns.id == id)
-            await database.execute(query=query)
-        except:
-            raise HTTPException(
-                status_code=404,
-                detail="Event not found",
-                headers={"X-Error": f"Event doens't exists"}
-            )
-        try:
-            query = Events.delete().where(Events.columns.id == id)
-            await database.execute(query=query)
-            return Response(content="Event deleted", status_code=status.HTTP_200_OK)
-        except:
-            raise HTTPException(
-                status_code=400,
-                detail="Server Busy",
-                headers={"X-Error": f"Delete error, please try again"}
-            )
-
-
-
+    
+    @database.transaction()
     async def createEvent(request: EventSchema):
         ip_address = str(request.ip_address)
         request_type = str(request.type)
@@ -112,8 +88,7 @@ class EventService:
                 headers={"X-Error": f"Create event error, please try again"}
             )
 
-
-
+    @database.transaction()
     async def updateEvent(id: int, request: EventPartialSchema):
         # Get data from database with id
         query = Events.select().where(Events.columns.id == id)
@@ -153,4 +128,26 @@ class EventService:
                 status_code=400,
                 detail="Server Busy",
                 headers={"X-Error": f"Update event error, please try again"}
+            )
+
+    @database.transaction()
+    async def deleteEvent(id: int):
+        try:
+            query = Events.select().where(Events.columns.id == id)
+            await database.execute(query=query)
+        except:
+            raise HTTPException(
+                status_code=404,
+                detail="Event not found",
+                headers={"X-Error": f"Event doens't exists"}
+            )
+        try:
+            query = Events.delete().where(Events.columns.id == id)
+            await database.execute(query=query)
+            return Response(content="Event deleted", status_code=status.HTTP_200_OK)
+        except:
+            raise HTTPException(
+                status_code=400,
+                detail="Server Busy",
+                headers={"X-Error": f"Delete error, please try again"}
             )

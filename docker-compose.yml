@@ -66,6 +66,7 @@ services:
     ports:
       - 8787:8787
     environment:
+        - BACKUP_SUFFIX=${DB_EXT}
         - POSTGRES_HOST=db
         - POSTGRES_DB=${DB_NAME}
         - POSTGRES_USER=${POSTGRES_USER}

@@ -4,8 +4,9 @@ services:
 
   db:
     container_name: postgresql_db
-    image: postgres
-    restart: always
+    build: 
+      context : ./postgre
+      dockerfile: Dockerfile
     ports:
       - ${DB_PORT}:5432
     environment:
@@ -100,7 +101,7 @@ services:
     ports:
       - 8787:8787
     environment:
-        - BACKUP_SUFFIX=.dup
+        - BACKUP_SUFFIX=${DB_EXT}
         - POSTGRES_HOST=db
         - POSTGRES_DB=${DB_NAME}
         - POSTGRES_USER=${POSTGRES_USER}

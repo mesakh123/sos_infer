@@ -16,8 +16,8 @@ def run():
    for i in range(50):
       # Preparing SQL queries to INSERT a record into the database.
       time.sleep(1)
-      cursor.execute('''INSERT INTO EVENTS(IP_ADDRESS, TYPE, SENT)
-      VALUES ('{}', 0, 0)'''.format(str(datetime.datetime.now(pytz.timezone('Asia/Taipei')).strftime('%Y-%m-%d %H:%M:%S'))))
+      cursor.execute('''INSERT INTO EVENTS(TIMESTAMPS,IP_ADDRESS, TYPE, SENT)
+      VALUES ('{}',0, 0, 0)'''.format(str(datetime.datetime.now(pytz.timezone('Asia/Taipei')).strftime('%Y-%m-%d %H:%M:%S'))))
 
    conn.commit()
    #Closing the connection

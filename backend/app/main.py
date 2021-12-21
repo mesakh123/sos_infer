@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from .config.database import database
-from .event import eventrouter
+from .event import eventrouter,eventservice
+from .dto import eventschema
 from fastapi.middleware.cors import CORSMiddleware
 
 dev = True
@@ -32,6 +33,19 @@ async def shutdown():
 async def Hello():
     return "Hello"
 
-
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        data = await websocket.receive_text()
+        try:
+            event = eventschema.EventSchema(**data)
+            query = await eventservice.EventService.webSocketCreateEvent(event)
+            result = ";".join(str(v) for k,v in query.items())
+            await websocket.send_text(result)
+        except: 
+            await websocket.send_text("Please try again")
+        
+        
 
 app.include_router(eventrouter.router)

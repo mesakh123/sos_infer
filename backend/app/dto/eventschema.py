@@ -10,6 +10,8 @@ class EventPartialSchema(BaseModel):
         orm_mode = True
 
 class EventSchema(BaseModel):
+    payload_length: Optional[str]
+    timestamps: Optional[str]
     ip_address: str
     type: int
     sent: Optional[int] = 0

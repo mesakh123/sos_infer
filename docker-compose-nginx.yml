@@ -76,7 +76,7 @@ services:
       context : ./nginx
       dockerfile: Dockerfile.multi
     ports:
-      - 5001:80
+      - 7777:80
     depends_on:
       - app1
       - app2
@@ -105,7 +105,7 @@ services:
         - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     #  - POSTGRES_PASSWORD_FILE=/run/secrets/db_password <-- alternative for POSTGRES_PASSWORD (to use with docker secrets)
         - POSTGRES_EXTRA_OPTS=-Z9 --schema=public --blobs
-        - SCHEDULE=@every 03h00m00s
+        - SCHEDULE=@edaily
         - BACKUP_KEEP_DAYS=7
         - BACKUP_KEEP_WEEKS=4
         - BACKUP_KEEP_MONTHS=6

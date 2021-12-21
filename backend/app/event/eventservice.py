@@ -157,13 +157,16 @@ class EventService:
             )
     @database.transaction()
     async def webSocketCreateEvent(request: EventSchema):
+        
+        payload_length = str(request.payload_length)
         ip_address = str(request.ip_address)
         request_type = str(request.type)
-        request_sent = str(request.sent)
         timestamps = str(datetime.datetime.now(pytz.timezone('Asia/Taipei')).strftime('%Y-%m-%d %H:%M:%S'))
+        request_sent = str(request.sent)
+        
         # Calculate payload length (fixed format)
         payload_length = "%05d" % (5 + 4 + len(timestamps) \
-            + len(ip_address) + len(request_type))
+            + len(ip_address) + len(request_type)) if payload_length =="" else payload_length
 
         # Initiate Event data
         db_cr = CreateEventSchema(
@@ -182,7 +185,7 @@ class EventService:
         # Execute data
 
         try:
-            await database.execute(query=query)
-            return query
+            last_record_id = await database.execute(query=query)
+            return last_record_id
         except:
             return None

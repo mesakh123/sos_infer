@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Websocket
 from .config.database import database
 from .event import eventrouter,eventservice
 from .dto import eventschema
@@ -41,6 +41,8 @@ async def websocket_endpoint(websocket: WebSocket):
         try:
             event = eventschema.EventSchema(**data)
             query = await eventservice.EventService.webSocketCreateEvent(event)
+            if query is None:
+                raise Exception
             result = ";".join(str(v) for k,v in query.items())
             await websocket.send_text(result)
         except: 

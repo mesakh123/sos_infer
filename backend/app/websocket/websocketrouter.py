@@ -62,7 +62,7 @@ async def forward(ws_a: WebSocket, ws_b: websockets.WebSocketClientProtocol):
 
 
 
-@router.websocket("/ws")     
+@router.websocket("/")     
 async def websocket_endpoint(ws_a: WebSocket):
     
     await ws_a.accept()
@@ -71,7 +71,7 @@ async def websocket_endpoint(ws_a: WebSocket):
         await asyncio.gather(fwd_task)       
 
 
-@router.websocket("/ws2")
+@router.websocket("/2")
 async def websocket_endpoint2(fastapiwebsocket: WebSocket):
     await fastapiwebsocket.accept()
     while True:
@@ -86,7 +86,7 @@ async def websocket_endpoint2(fastapiwebsocket: WebSocket):
         except: 
             await fastapiwebsocket.send_text("Please try again")
 
-@router.websocket("/ws3")    
+@router.websocket("/3")    
 async def websocket_endpoint3(fastapiwebsocket: WebSocket):
     
     uri = "ws://localhost:5001/"

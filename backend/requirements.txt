@@ -11,3 +11,4 @@ asyncio
 pytz
 asyncio
 nest_asyncio
+websocket-client

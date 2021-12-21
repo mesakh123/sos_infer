@@ -1,8 +1,9 @@
 from typing import Optional
-from fastapi import APIRouter, WebSocket,  Cookie, Depends, FastAPI, Query, WebSocket, status
+from fastapi import APIRouter, WebSocket,  Cookie, Query, WebSocket, status
 from ..dto.eventschema import EventSchema
 from ..event.eventrouter import EventService
-
+import websockets
+import json
 router = APIRouter(prefix="/ws", tags=["Web Socket"])
 
 
@@ -16,17 +17,36 @@ async def get_cookie_or_token(
     return session or token
 
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
+@router.websocket("/ws2")
+async def websocket_endpoint2(fastapiwebsocket: WebSocket):
+    await fastapiwebsocket.accept()
     while True:
-        data = await websocket.receive_text()
+        data = await fastapiwebsocket.receive_text()
         try:
             event = EventSchema(**data)
             query = await EventService.webSocketCreateEvent(event)
             if query is None:
                 raise Exception
-            result = ";".join(str(v) for k,v in query.items())
-            await websocket.send_text(result)
+            result = ";".join(str(v) for k,v in query.items()) +";"            
+            await fastapiwebsocket.send_text(result)
         except: 
-            await websocket.send_text("Please try again")
+            await fastapiwebsocket.send_text("Please try again")
+    
+
+@router.websocket("/ws")
+async def websocket_endpoint():
+    
+    uri = "ws://localhost:5001/"
+    
+    while True:
+        data = await websockets.receive_json()
+        data = json.loads(data)
+        try:
+            event = EventSchema(**data)
+            query = await EventService.webSocketCreateEvent(event)
+            if query is None:
+                raise Exception
+            result = ";".join(str(v) for k,v in query.items()) +";"            
+            await websockets.send_text(result)
+        except: 
+            await websockets.send_text("Please try again")

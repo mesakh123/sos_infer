@@ -50,3 +50,6 @@ restore
 1. cd /var/lib/postgresql/data
 2.  pg_restore -c -U root - "backup_file.tar" -W
 pg_restore -U root -Ft -C -d sos_infer_db < backup_file.tar
+
+socket programming
+https://coderedirect.com/questions/211552/python-simple-socket-client-server-using-asyncio

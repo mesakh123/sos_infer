@@ -16,7 +16,7 @@ async def get_cookie_or_token(
     return session or token
 
 
-@app.websocket("/ws")
+@router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     while True:

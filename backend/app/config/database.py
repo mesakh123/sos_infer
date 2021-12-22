@@ -1,7 +1,6 @@
 
 import sqlalchemy
 import os, urllib
-import nest_asyncio
 from databases import Database
 from sqlalchemy.ext.asyncio import create_async_engine
 

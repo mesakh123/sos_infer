@@ -43,6 +43,9 @@ services:
       - ./.env
     ports:
       - 9000:9000
+      - 5001:5001
+    environment:
+      SOCKET_PORT: 5001
     restart: always
     depends_on:
       - db
@@ -62,7 +65,10 @@ services:
       - ./.env
     ports:
       - 9001:9000
+      - 5002:5002
     restart: always
+    environment:
+      SOCKET_PORT: 5002
     depends_on:
       - db
     networks: 
@@ -76,7 +82,7 @@ services:
       context : ./nginx
       dockerfile: Dockerfile.multi
     ports:
-      - 5001:80
+      - 7777:80
     depends_on:
       - app1
       - app2

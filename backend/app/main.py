@@ -6,7 +6,7 @@ import asyncio
 from .event.eventrouter import EventService
 from .dto.eventschema import EventSchema
 from .models.eventmodels import Events
-
+import os
 
 dev = True
 
@@ -70,7 +70,8 @@ async def handle_client(reader, writer):
 
 SERVER = None
 async def run_server():
-    server = await asyncio.start_server(handle_client, '0.0.0.0', 5001)
+    port = int(str(os.environ.get('SOCKET_PORT', '5001')))
+    server = await asyncio.start_server(handle_client, '0.0.0.0', port)
     async with server:
         await server.serve_forever()    
     return server     

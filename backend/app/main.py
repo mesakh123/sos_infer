@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from .config.database import database
 from .event import eventrouter
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,7 +25,7 @@ app.add_middleware(
 )
 
 
-async def handle_client(reader, writer):
+async def receive_data(reader, writer):
 
     try:
         request = (await reader.read(255)).decode('utf8')
@@ -68,26 +68,46 @@ async def handle_client(reader, writer):
     writer.close()
 
 
-SERVER = None
+async def send_data(ip,port):
+    
+    while True:
+        try:
+            reader, writer = await asyncio.open_connection(ip , port, ssl=False)
+            query = Events.update().where(Events.columns.sent == -1)
+            data = await database.fetch_all(query=query)
+            for d in data:
+                print(d)
+        except:
+            pass
+        
+        await asyncio.sleep(1)
+        
+    
+
+
+
 async def run_server():
-    port = int(str(os.environ.get('SOCKET_PORT', '5001')))
-    server = await asyncio.start_server(handle_client, '0.0.0.0', port)
+    port = int(str(os.environ.get('TRITON_SOCKET_PORT', '9797')))
+    server = await asyncio.start_server(receive_data, '0.0.0.0', port)    
     async with server:
-        await server.serve_forever()    
-    return server     
+        await asyncio.gather(server.serve_forever()) 
+
+async def run_client():
+    ip = str(os.environ.get('FE_SOCKET_IP', '0.0.0.0'))
+    port = int(str(os.environ.get('FE_SOCKET_PORT', '5001')))
+    asyncio.create_task(send_data(ip,port))
+
 
 @app.on_event("startup")
 async def startup():
-    global SERVER
     await database.connect()
-    SERVER = await run_server()
+    asyncio.create_task(run_server())
+    asyncio.create_task(run_client())
     
 
 @app.on_event("shutdown")
 async def shutdown():
-    global SERVER    
     await database.disconnect()
-    await SERVER.wait_closed()
 
 
 @app.get("/")
@@ -96,5 +116,3 @@ async def Hello():
 
 
 app.include_router(eventrouter.router)
-
-

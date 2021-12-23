@@ -46,7 +46,7 @@ services:
       - 5001
     ports:
       - 9000:9000
-      - 5001:5001
+      - 9797:9797
     restart: always
     networks: 
       - app_network
@@ -74,8 +74,8 @@ services:
         - POSTGRES_USER=${POSTGRES_USER}
         - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     #  - POSTGRES_PASSWORD_FILE=/run/secrets/db_password <-- alternative for POSTGRES_PASSWORD (to use with docker secrets)
-        - POSTGRES_EXTRA_OPTS=-Z9 --schema=public --blobs
-        - SCHEDULE=@edaily
+        - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
+        - SCHEDULE=@daily
         - BACKUP_KEEP_DAYS=7
         - BACKUP_KEEP_WEEKS=4
         - BACKUP_KEEP_MONTHS=6

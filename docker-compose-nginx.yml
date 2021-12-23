@@ -41,11 +41,11 @@ services:
       dockerfile: Dockerfile
     env_file:
       - ./.env
+    expose:
+      - 9000
     ports:
       - 9000:9000
-      - 5001:5001
-    environment:
-      SOCKET_PORT: 5001
+      - 9999:9999
     restart: always
     depends_on:
       - db
@@ -63,12 +63,12 @@ services:
       dockerfile: Dockerfile
     env_file:
       - ./.env
+    expose:
+      - 9001
     ports:
       - 9001:9000
-      - 5002:5002
+      - 10000:9999
     restart: always
-    environment:
-      SOCKET_PORT: 5002
     depends_on:
       - db
     networks: 
@@ -110,7 +110,7 @@ services:
         - POSTGRES_USER=${POSTGRES_USER}
         - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     #  - POSTGRES_PASSWORD_FILE=/run/secrets/db_password <-- alternative for POSTGRES_PASSWORD (to use with docker secrets)
-        - POSTGRES_EXTRA_OPTS=-Z9 --schema=public --blobs
+        - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
         - SCHEDULE=@daily
         - BACKUP_KEEP_DAYS=7
         - BACKUP_KEEP_WEEKS=4

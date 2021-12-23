@@ -27,7 +27,4 @@ async def init_db():
         await conn.run_sync(metadata.create_all)
 
 
-import asyncio
-loop = asyncio.get_event_loop()
-loop.create_task(init_db())
 #metadata.create_all(engine)

@@ -43,10 +43,9 @@ services:
       - ./.env
     expose:
       - 9000
-      - 5001
     ports:
       - 9000:9000
-      - 9797:9797
+      - 9999:9999
     restart: always
     networks: 
       - app_network

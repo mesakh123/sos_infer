@@ -101,6 +101,7 @@ async def run_client2(ip, port):
     while True:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((ip, port))
+            print(ip,port)
             query = Events.select().where(Events.c.sent == 0)
             data = await database.fetch_all(query=query)
             if data:

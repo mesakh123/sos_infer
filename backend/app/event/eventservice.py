@@ -52,6 +52,10 @@ class EventService:
             )
         return EventQuery(**data).dict()
     
+    
+    
+    
+    
     @database.transaction()
     async def createEvent(request: EventSchema):
         ip_address = str(request.ip_address)
@@ -70,7 +74,7 @@ class EventService:
             type = int(request_type),
             sent = int(request_sent),
         )
-        # filter Event data
+        # init Event data
         query = {k : v for k,v in db_cr.dict().items() if v is not None}
 
         # Initiate Insert command
@@ -151,3 +155,37 @@ class EventService:
                 detail="Server Busy",
                 headers={"X-Error": f"Delete error, please try again"}
             )
+    @database.transaction()
+    async def webSocketCreateEvent(request: EventSchema):
+        
+        payload_length = str(request.payload_length)
+        ip_address = str(request.ip_address)
+        request_type = str(request.type)
+        timestamps = str(datetime.datetime.now(pytz.timezone('Asia/Taipei')).strftime('%Y-%m-%d %H:%M:%S'))
+        request_sent = str(request.sent)
+        
+        # Calculate payload length (fixed format)
+        payload_length = "%05d" % (5 + 4 + len(timestamps) \
+            + len(ip_address) + len(request_type)) if payload_length =="" else payload_length
+
+        # Initiate Event data
+        db_cr = CreateEventSchema(
+            payload_length = payload_length,
+            timestamps = timestamps,
+            ip_address = ip_address,
+            type = int(request_type),
+            sent = int(request_sent),
+        )
+        # init Event data
+        query = {k : v for k,v in db_cr.dict().items() if v is not None}
+
+        # Initiate Insert command
+        query = Events.insert(values=query)
+
+        # Execute data
+
+        try:
+            last_record_id = await database.execute(query=query)
+            return last_record_id
+        except:
+            return None

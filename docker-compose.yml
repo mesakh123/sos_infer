@@ -45,6 +45,7 @@ services:
       - 9000
     ports:
       - 9000:9000
+      - 9999:9999
     restart: always
     networks: 
       - app_network
@@ -72,8 +73,8 @@ services:
         - POSTGRES_USER=${POSTGRES_USER}
         - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     #  - POSTGRES_PASSWORD_FILE=/run/secrets/db_password <-- alternative for POSTGRES_PASSWORD (to use with docker secrets)
-        - POSTGRES_EXTRA_OPTS=-Z9 --schema=public --blobs
-        - SCHEDULE=@every 0h1m00s
+        - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
+        - SCHEDULE=@daily
         - BACKUP_KEEP_DAYS=7
         - BACKUP_KEEP_WEEKS=4
         - BACKUP_KEEP_MONTHS=6
@@ -84,7 +85,8 @@ services:
 
 networks:
   app_network:
-    driver: bridge
+    name: host
+    external: true
 #  adminer:
 #    image: adminer
 #    restart: always

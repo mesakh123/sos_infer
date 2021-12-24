@@ -20,11 +20,11 @@ A. Start alembic
 5. docker-compose run --rm app alembic upgrade head
 6. sudo docker-compose up --build -d --force-recreate
 
-
+psql -U root postgres / psql postgres -d sos_infer_db
 create role root superuser;
 create database sos_infer_db;
 ALTER USER root with PASSWORD 'linkeradmin123';
-psql postgres -d sos_infer_db
+
 
 http://127.0.0.1:9000/event/?id=1&timestamps=timestamps&ip_address=127.0.0.1&type=0&sent=1&skip=100&limit=300
 
@@ -50,3 +50,6 @@ restore
 1. cd /var/lib/postgresql/data
 2.  pg_restore -c -U root - "backup_file.tar" -W
 pg_restore -U root -Ft -C -d sos_infer_db < backup_file.tar
+
+socket programming
+https://coderedirect.com/questions/211552/python-simple-socket-client-server-using-asyncio

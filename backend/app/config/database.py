@@ -1,7 +1,6 @@
 
 import sqlalchemy
 import os, urllib
-import nest_asyncio
 from databases import Database
 from sqlalchemy.ext.asyncio import create_async_engine
 
@@ -28,7 +27,4 @@ async def init_db():
         await conn.run_sync(metadata.create_all)
 
 
-import asyncio
-loop = asyncio.get_event_loop()
-loop.create_task(init_db())
 #metadata.create_all(engine)

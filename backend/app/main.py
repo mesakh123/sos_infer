@@ -77,7 +77,10 @@ async def run_server():
 async def run_client(ip, port):
     
     while True:
-        reader, writer = await asyncio.open_connection(ip , port, ssl=False)
+        try:
+            reader, writer = await asyncio.open_connection(ip , port, ssl=False)
+        except:
+            break
         query = Events.select().where(Events.c.sent == 0)
         data = await database.fetch_all(query=query)
         if data:
@@ -93,14 +96,15 @@ async def run_client(ip, port):
                 await database.execute(query=query)
                 writer.write(s.encode("utf-8"))
                 
+                await asyncio.sleep(0.001)
         writer.close()
         await writer.wait_closed()
             
 async def run_client2(ip, port):
-    
-    async with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((ip, port))
-        while True:
+    while True:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.connect((ip, port))
                 query = Events.select().where(Events.c.sent == 0)
                 data = await database.fetch_all(query=query)
                 if data:
@@ -115,7 +119,8 @@ async def run_client2(ip, port):
                         sent = False
                         await database.execute(query=query)
                         s.send(string.encode("utf-8"))
-                await asyncio.sleep(3)
+        except:
+            await asyncio.sleep(3) 
 
 async def tcp_reconnect():
     host = str(os.environ.get('FE_SOCKET_IP', '0.0.0.0'))
@@ -131,7 +136,7 @@ async def tcp_reconnect():
             print('Connection to server {} timed out!'.format(server))
         else:
             print('Connection to server {} is closed.'.format(server))
-        await asyncio.sleep(2.0)
+        await asyncio.sleep(1.0)
 
 @app.on_event("startup")
 async def startup():

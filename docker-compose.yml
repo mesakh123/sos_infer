@@ -1,7 +1,6 @@
-version: '3.1'
+version: "3.1"
 
 services:
-
   db:
     container_name: postgresql_db
     image: postgres
@@ -13,7 +12,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       PGDATA: /var/lib/postgresql/data/sos_infer_api/
-    networks: 
+    networks:
       - app_network
     volumes:
       - ./postgres-data:/var/lib/postgresql/data/
@@ -29,9 +28,8 @@ services:
       - 5050:80
     depends_on:
       - db
-    networks: 
+    networks:
       - app_network
-
 
   app:
     container_name: sos_infer_api
@@ -47,7 +45,7 @@ services:
       - 9000:9000
       - 9999:9999
     restart: always
-    networks: 
+    networks:
       - app_network
     volumes:
       - ./backend:/backend
@@ -59,34 +57,32 @@ services:
     image: prodrigestivill/postgres-backup-local
     restart: always
     volumes:
-        - ./postgres-data:/backups
+      - ./postgres-data:/backups
     links:
-        - db:db
+      - db:db
     depends_on:
-        - db
+      - db
     ports:
       - 8787:8787
     environment:
-        - BACKUP_SUFFIX=${DB_EXT}
-        - POSTGRES_HOST=db
-        - POSTGRES_DB=${DB_NAME}
-        - POSTGRES_USER=${POSTGRES_USER}
-        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    #  - POSTGRES_PASSWORD_FILE=/run/secrets/db_password <-- alternative for POSTGRES_PASSWORD (to use with docker secrets)
-        - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
-        - SCHEDULE=@daily
-        - BACKUP_KEEP_DAYS=7
-        - BACKUP_KEEP_WEEKS=4
-        - BACKUP_KEEP_MONTHS=6
-        - HEALTHCHECK_PORT=8787
-    networks: 
+      - BACKUP_SUFFIX=${DB_EXT}
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      #  - POSTGRES_PASSWORD_FILE=/run/secrets/db_password <-- alternative for POSTGRES_PASSWORD (to use with docker secrets)
+      - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
+      - SCHEDULE=@daily
+      - BACKUP_KEEP_DAYS=7
+      - BACKUP_KEEP_WEEKS=4
+      - BACKUP_KEEP_MONTHS=6
+      - HEALTHCHECK_PORT=8787
+    networks:
       - app_network
-
 
 networks:
   app_network:
-    name: host
-    external: true
+    driver: bridge
 #  adminer:
 #    image: adminer
 #    restart: always

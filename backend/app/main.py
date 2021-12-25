@@ -98,25 +98,24 @@ async def run_client(ip, port):
             
 async def run_client2(ip, port):
     
-    while True:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect((ip, port))
-            print(ip,port)
-            query = Events.select().where(Events.c.sent == 0)
-            data = await database.fetch_all(query=query)
-            if data:
-                for d in data:
-                    new_data = dict(d.items())
-                    new_data.pop("sent")
-                    id = new_data['id']
-                    new_data.pop("id")
-                    string= ";".join(str(v) for k,v in new_data.items()) +";"
-                    new_data['sent'] = 1
-                    query = Events.update().where(Events.c.id == int(id)).values(**new_data)
-                    sent = False
-                    await database.execute(query=query)
-                    s.send(string.encode("utf-8"))
-            await asyncio.sleep(3)
+    async with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((ip, port))
+        while True:
+                query = Events.select().where(Events.c.sent == 0)
+                data = await database.fetch_all(query=query)
+                if data:
+                    for d in data:
+                        new_data = dict(d.items())
+                        new_data.pop("sent")
+                        id = new_data['id']
+                        new_data.pop("id")
+                        string= ";".join(str(v) for k,v in new_data.items()) +";"
+                        new_data['sent'] = 1
+                        query = Events.update().where(Events.c.id == int(id)).values(**new_data)
+                        sent = False
+                        await database.execute(query=query)
+                        s.send(string.encode("utf-8"))
+                await asyncio.sleep(3)
 
 async def tcp_reconnect():
     host = str(os.environ.get('FE_SOCKET_IP', '0.0.0.0'))
@@ -125,7 +124,7 @@ async def tcp_reconnect():
     while True:
         print('Connecting to server {} ...'.format(server))
         try:
-            await run_client2(host, port)
+            await run_client(host, port)
         except ConnectionRefusedError:
             print('Connection to server {} failed!'.format(server))
         except asyncio.TimeoutError:

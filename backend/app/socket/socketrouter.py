@@ -90,7 +90,6 @@ async def run_client2(ip, port):
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.connect((ip, port))
-                s.setblocking(0)
                 query = Events.select().where(Events.c.sent == 0)
                 data = await database.fetch_all(query=query)
                 if data:
@@ -119,7 +118,7 @@ async def tcp_reconnect():
         now = datetime.now(timezone).strftime("%d/%m/%Y %H:%M:%S")
         print('{} Connecting to server {} ...'.format(now, server))
         try:
-            await run_client(host, port)
+            await run_client2(host, port)
         except ConnectionRefusedError:
             print('Connection to server {} failed!'.format(server))
         except asyncio.TimeoutError:

@@ -113,13 +113,13 @@ async def tcp_reconnect():
     port = int(str(os.environ.get('FE_SOCKET_PORT', '5001')))
     server = '{} {}'.format(host, port)
     timezone = pytz.timezone("Asia/Taipei")
-    t = False
+    t = True
     while True:
         now = datetime.now(timezone).strftime("%d/%m/%Y %H:%M:%S")
         print('{} Connecting to server {} ...'.format(now, server))
         if t:
             try:
-                await run_client(host, port)
+                await run_client2(host, port)
             except ConnectionRefusedError:
                 print('Connection to server {} failed!'.format(server))
             except asyncio.TimeoutError:
@@ -127,5 +127,5 @@ async def tcp_reconnect():
             else:
                 print('Connection to server {} is closed.'.format(server))
         else:
-            await run_client(host, port)
+            await run_client2(host, port)
         await asyncio.sleep(1.0)

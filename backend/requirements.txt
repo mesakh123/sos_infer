@@ -1,4 +1,4 @@
-alembic==1.7.5
+alembic
 asgiref==3.4.1
 asyncio==3.4.3
 asyncpg==0.25.0

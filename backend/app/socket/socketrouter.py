@@ -87,12 +87,12 @@ async def run_client(ip, port):
 
 async def run_client2(ip, port):
     while True:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect((ip, port))
-            s.setblocking(0)
-            query = Events.select().where(Events.c.sent == 0)
-            data = await database.fetch_all(query=query)
-            if data:
+        query = Events.select().where(Events.c.sent == 0)
+        data = await database.fetch_all(query=query)
+        if data:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.connect((ip, port))
+                s.setblocking(0)
                 for d in data:
                     new_data = dict(d.items())
                     new_data.pop("sent")
@@ -105,7 +105,7 @@ async def run_client2(ip, port):
                     sent = False
                     await database.execute(query=query)
                     s.send(string.encode("utf-8"))
-            await asyncio.sleep(3)
+        await asyncio.sleep(3)
 
 
 async def tcp_reconnect():

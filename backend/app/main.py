@@ -18,6 +18,12 @@ for name in logging.root.manager.loggerDict.keys():
 
 dev = True
 
+curr_logger = logging.getLogger(__name__)
+uvicorn_access_logger = logging.getLogger("uvicorn.access")
+
+
+
+
 if dev:
     app = FastAPI()
 else:
@@ -36,8 +42,8 @@ app.add_middleware(
 async def startup():
     # asyncio.create_task()
 
-    curr_logger = logging.getLogger(__name__)
-    uvicorn_access_logger = logging.getLogger("uvicorn.access")
+    #curr_logger = logging.getLogger(__name__)
+    #uvicorn_access_logger = logging.getLogger("uvicorn.access")
     handler = logging.StreamHandler()
     handler.setFormatter(
         logging.Formatter(

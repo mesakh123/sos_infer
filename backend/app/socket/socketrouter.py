@@ -104,7 +104,9 @@ async def run_client2(ip, port):
                     query = Events.update().where(Events.c.id == int(id)).values(**new_data)
                     sent = False
                     await database.execute(query=query)
+                    print(string)
                     s.send(string.encode("utf-8"))
+                    await asyncio.sleep(1)
         await asyncio.sleep(3)
 
 

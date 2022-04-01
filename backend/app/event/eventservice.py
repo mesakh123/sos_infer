@@ -41,16 +41,18 @@ class EventService:
             query = query.where(getattr(Events.columns, attribute) == value)
         
         # Execute query
-        data = await database.fetch_one(query)
-
-        # If data doesn't exist return None
-        if not data:
+        try:
+            #data = await database.fetch_all(query)
+            data = await database.fetch_all(query.offset(skip).limit(limit).order_by( desc(Events.c.timestamps)))
+            return data
+        except:
+           # If data doesn't exist return None
             raise HTTPException(
                 status_code=404,
                 detail="Event not found",
                 headers={"X-Error": f"Event doens't exists"}
             )
-        return EventQuery(**data).dict()
+        #return EventQuery(**data).dict()
     
     
     

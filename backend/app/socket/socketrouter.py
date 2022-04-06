@@ -1,3 +1,4 @@
+
 import os
 import socket
 import asyncio
@@ -7,6 +8,7 @@ from ..event.eventrouter import EventService
 from ..dto.eventschema import EventSchema
 from ..models.eventmodels import Events
 from ..config.database import database
+from ..logger import curr_logger as logger
 
 
 async def receive_data(reader, writer):
@@ -21,10 +23,15 @@ async def receive_data(reader, writer):
             "ip_address": strings[2],
             "type": int(strings[3])
         }
+
+        logger.info("Event received at " + str(datetime.now(pytz.timezone(
+            'Asia/Taipei')).strftime('%Y-%m-%d %H:%M:%S:%f')))
+
         event = EventSchema(**data)
         attemps = 5
 
         saved = False
+
         while attemps:
             try:
 
@@ -74,13 +81,16 @@ async def run_client(ip, port):
                 id = new_data['id']
                 new_data.pop("id")
                 s = ";".join(str(v) for k, v in new_data.items()) + ";"
-                new_data['sent'] = 1
-                query = Events.update().where(Events.c.id == int(id)).values(**new_data)
-                sent = False
-                await database.execute(query=query)
-                writer.write(s.encode("utf-8"))
 
-                await asyncio.sleep(0.001)
+                try:
+                    new_data['sent'] = 1
+                    query = Events.update().where(Events.c.id == int(id)).values(**new_data)
+                    sent = False
+                    await database.execute(query=query)
+                    writer.write(s.encode("utf-8"))
+                except Exception as e:
+                    print
+                await asyncio.sleep(1)
         writer.close()
         await writer.wait_closed()
 
@@ -90,6 +100,8 @@ async def run_client2(ip, port):
         query = Events.select().where(Events.c.sent == 0)
         data = await database.fetch_all(query=query)
         if data:
+            logger.info("Query db with sent = 0 finished at " + str(datetime.now(pytz.timezone(
+                        'Asia/Taipei')).strftime('%Y-%m-%d %H:%M:%S:%f')))
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.connect((ip, port))
                 s.setblocking(0)
@@ -100,14 +112,22 @@ async def run_client2(ip, port):
                     new_data.pop("id")
                     string = ";".join(str(v)
                                       for k, v in new_data.items()) + ";"
-                    new_data['sent'] = 1
-                    query = Events.update().where(Events.c.id == int(id)).values(**new_data)
-                    sent = False
-                    await database.execute(query=query)
-                    print(string)
-                    s.send(string.encode("utf-8"))
+
+                    try:
+                        s.sendall(string.encode("utf-8"))
+                        new_data['sent'] = 1
+                        query = Events.update().where(Events.c.id == int(id)).values(**new_data)
+                        logger.info("Event sent success to the Front End at " + str(datetime.now(pytz.timezone(
+                            'Asia/Taipei')).strftime('%Y-%m-%d %H:%M:%S:%f')))
+
+                        await database.execute(query=query)
+
+                    except Exception as e:
+                        logger.info("Event sent fail to the Front End at " + str(datetime.now(pytz.timezone(
+                            'Asia/Taipei')).strftime('%Y-%m-%d %H:%M:%S:%f')))
+                        logger.info("Exception : " + str(e))
                     await asyncio.sleep(1)
-        await asyncio.sleep(3)
+        await asyncio.sleep(1)
 
 
 async def tcp_reconnect():

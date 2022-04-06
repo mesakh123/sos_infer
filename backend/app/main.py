@@ -5,23 +5,9 @@ from .event import eventrouter
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 from .socket import socketrouter
-
-import logging
-
-
-logging.root.handlers = []
-logging.root.setLevel(logging.DEBUG)
-for name in logging.root.manager.loggerDict.keys():
-    logging.getLogger(name).handlers = []
-    logging.getLogger(name).propagate = True
-
+from .logger import curr_logger, uvicorn_access_logger
 
 dev = True
-
-curr_logger = logging.getLogger(__name__)
-uvicorn_access_logger = logging.getLogger("uvicorn.access")
-
-
 
 
 if dev:
@@ -38,20 +24,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.on_event("startup")
 async def startup():
     # asyncio.create_task()
 
     #curr_logger = logging.getLogger(__name__)
     #uvicorn_access_logger = logging.getLogger("uvicorn.access")
-    handler = logging.StreamHandler()
-    handler.setFormatter(
-        logging.Formatter(
-            "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s"
-        )
-    )
-    logging.root.addHandler(handler)
-
 
     curr_logger.info("Connect database started")
     uvicorn_access_logger.info("Connect database started")
@@ -70,9 +49,6 @@ async def startup():
     uvicorn_access_logger.info("Start  client socket")
     asyncio.create_task(socketrouter.tcp_reconnect())
     uvicorn_access_logger.info("Client socket finished")
-
-
-
 
 
 @app.on_event("shutdown")

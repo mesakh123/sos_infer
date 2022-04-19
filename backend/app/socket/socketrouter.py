@@ -23,6 +23,9 @@ async def receive_data(reader, writer):
             "type": int(strings[3]),
         }
 
+        payload = ""
+        for s in strings:
+            payload += " " + s
         logger.info(
             "Event received at "
             + str(
@@ -30,8 +33,8 @@ async def receive_data(reader, writer):
                     "%Y-%m-%d %H:%M:%S:%f"
                 )
             )
-            + " with time payload "
-            + strings[1]
+            + " with payload "
+            + payload
         )
 
         event = EventSchema(**data)
@@ -146,7 +149,7 @@ async def run_client2(ip, port):
                                     "%Y-%m-%d %H:%M:%S:%f"
                                 )
                             )
-                            + " with time payload "
+                            + " with payload "
                             + status
                         )
 

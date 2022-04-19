@@ -135,6 +135,10 @@ async def run_client2(ip, port):
                             .where(Events.c.id == int(id))
                             .values(**new_data)
                         )
+
+                        status = ""
+                        for k, v in new_data.items():
+                            status + " " + v
                         logger.info(
                             "Event sent success to the Front End at "
                             + str(

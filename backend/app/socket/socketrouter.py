@@ -138,7 +138,7 @@ async def run_client2(ip, port):
 
                         status = ""
                         for k, v in new_data.items():
-                            status + " " + v
+                            status += " " + v
                         logger.info(
                             "Event sent success to the Front End at "
                             + str(
@@ -147,7 +147,7 @@ async def run_client2(ip, port):
                                 )
                             )
                             + " with time payload "
-                            + new_data
+                            + status
                         )
 
                         await database.execute(query=query)
